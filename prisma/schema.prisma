@@ -1,0 +1,160 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/**
+ * Enums (mapped to the exact lowercase strings you specified)
+ */
+enum UserRole {
+  CUSTOMER @map("customer")
+  ADMIN    @map("admin")
+}
+
+enum OrderStatus {
+  PLACED    @map("placed")
+  SHIPPED   @map("shipped")
+  DELIVERED @map("delivered")
+  CANCELLED @map("cancelled")
+}
+
+enum OrderPaymentStatus {
+  PENDING  @map("pending")
+  PAID     @map("paid")
+  FAILED   @map("failed")
+  REFUNDED @map("refunded")
+}
+
+enum PaymentStatus {
+  SUCCESS @map("success")
+  FAILED  @map("failed")
+  PENDING @map("pending")
+}
+
+/**
+ * Models (fields mapped to the exact column names in your plan)
+ */
+
+model User {
+  id            String   @id @default(uuid()) @map("id") @db.Uuid
+  name          String   @map("name")
+  email         String   @unique @map("email")
+  password_hash String   @map("password_hash")
+  role          UserRole @default(CUSTOMER) @map("role")
+  created_at    DateTime @default(now()) @map("created_at")
+  updated_at    DateTime @updatedAt @map("updated_at")
+
+  orders Order[]
+
+  cart    Cart?
+  reviews Review[]
+
+  @@map("users")
+}
+
+model Product {
+  id          String   @id @default(uuid()) @map("id") @db.Uuid
+  name        String   @map("name")
+  description String?  @map("description")
+  price       Decimal  @map("price") @db.Decimal(10, 2)
+  stock       Int      @map("stock")
+  category_id String   @map("category_id") @db.Uuid
+  images      Json?    @map("images") // JSONB array of image URLs
+  created_at  DateTime @default(now()) @map("created_at")
+  updated_at  DateTime @updatedAt @map("updated_at")
+
+  category   Category    @relation(fields: [category_id], references: [id])
+  orderItems OrderItem[]
+  reviews    Review[]
+
+  @@map("products")
+}
+
+model Category {
+  id        String  @id @default(uuid()) @map("id") @db.Uuid
+  name      String  @map("name")
+  parent_id String? @map("parent_id") @db.Uuid
+
+  parent   Category?  @relation("CategoryChildren", fields: [parent_id], references: [id])
+  children Category[] @relation("CategoryChildren")
+
+  products Product[]
+
+  @@map("categories")
+}
+
+model Order {
+  id             String             @id @default(uuid()) @map("id") @db.Uuid
+  user_id        String             @map("user_id") @db.Uuid
+  total_amount   Decimal            @map("total_amount") @db.Decimal(10, 2)
+  payment_status OrderPaymentStatus @default(PENDING) @map("payment_status")
+  order_status   OrderStatus        @default(PLACED) @map("order_status")
+  created_at     DateTime           @default(now()) @map("created_at")
+  updated_at     DateTime           @updatedAt @map("updated_at")
+
+  user     User        @relation(fields: [user_id], references: [id])
+  items    OrderItem[]
+  payments Payment[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id         String  @id @default(uuid()) @map("id") @db.Uuid
+  order_id   String  @map("order_id") @db.Uuid
+  product_id String  @map("product_id") @db.Uuid
+  quantity   Int     @map("quantity")
+  price      Decimal @map("price") @db.Decimal(10, 2)
+
+  order   Order   @relation(fields: [order_id], references: [id])
+  product Product @relation(fields: [product_id], references: [id])
+
+  @@map("order_items")
+}
+
+model Cart {
+  id      String @id @default(uuid()) @map("id") @db.Uuid
+  user_id String @unique @map("user_id") @db.Uuid
+  items   Json   @map("items") // JSONB: [{ productId, qty, price }, ...]
+
+  user User @relation(fields: [user_id], references: [id])
+
+  @@map("cart")
+}
+
+model Review {
+  id         String   @id @default(uuid()) @map("id") @db.Uuid
+  product_id String   @map("product_id") @db.Uuid
+  user_id    String   @map("user_id") @db.Uuid
+  rating     Int      @map("rating")
+  comment    String?  @map("comment")
+  created_at DateTime @default(now()) @map("created_at")
+
+  product Product @relation(fields: [product_id], references: [id])
+  user    User    @relation(fields: [user_id], references: [id])
+
+  @@map("reviews")
+}
+
+model Payment {
+  id       String        @id @default(uuid()) @map("id") @db.Uuid
+  order_id String        @map("order_id") @db.Uuid
+  amount   Decimal       @map("amount") @db.Decimal(10, 2)
+  provider String        @map("provider")
+  status   PaymentStatus @default(PENDING) @map("status")
+
+  order Order @relation(fields: [order_id], references: [id])
+
+  @@map("payments")
+}
