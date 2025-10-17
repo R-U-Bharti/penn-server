@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -8,166 +7,166 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/* -------------------- ENUMS -------------------- */
+/* ---------- ENUMS ---------- */
 
-enum UserRole {
-  CUSTOMER @map("customer")
-  ADMIN    @map("admin")
+enum user_role {
+  customer
+  admin
 }
 
-enum OrderStatus {
-  PLACED    @map("placed")
-  SHIPPED   @map("shipped")
-  DELIVERED @map("delivered")
-  CANCELLED @map("cancelled")
+enum order_status {
+  placed
+  shipped
+  delivered
+  cancelled
 }
 
-enum OrderPaymentStatus {
-  PENDING  @map("pending")
-  PAID     @map("paid")
-  FAILED   @map("failed")
-  REFUNDED @map("refunded")
+enum order_payment_status {
+  pending
+  paid
+  failed
+  refunded
 }
 
-enum PaymentStatus {
-  SUCCESS @map("success")
-  FAILED  @map("failed")
-  PENDING @map("pending")
+enum payment_status {
+  pending
+  success
+  failed
 }
 
-/* -------------------- MODELS -------------------- */
+/* ---------- MODELS ---------- */
 
-model User {
-  id           String    @id @default(uuid())
-  name         String
-  email        String    @unique
-  passwordHash String
-  role         UserRole  @default(CUSTOMER)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+model users {
+  id            String    @id @default(uuid())
+  name          String
+  email         String    @unique
+  password_hash String
+  role          user_role @default(customer)
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
 
-  addresses    Address[]
-  carts        Cart[]
-  orders       Order[]
-  reviews      Review[]
+  addresses     addresses[]
+  carts         carts[]
+  orders        orders[]
+  reviews       reviews[]
 }
 
-model Address {
-  id          String   @id @default(uuid())
-  userId      String
-  line1       String
-  line2       String?
-  city        String
-  state       String
-  country     String
-  postalCode  String
-  createdAt   DateTime @default(now())
+model addresses {
+  id           String   @id @default(uuid())
+  user_id      String
+  line1        String
+  line2        String?
+  city         String
+  state        String
+  country      String
+  postal_code  String
+  created_at   DateTime @default(now())
 
-  user        User     @relation(fields: [userId], references: [id])
-  orders      Order[]
+  user         users    @relation(fields: [user_id], references: [id])
+  orders       orders[]
 }
 
-model Category {
-  id        String      @id @default(uuid())
-  name      String
-  parentId  String?
-  createdAt DateTime     @default(now())
+model categories {
+  id         String      @id @default(uuid())
+  name       String
+  parent_id  String?
+  created_at DateTime     @default(now())
 
-  parent    Category?   @relation("CategoryParent", fields: [parentId], references: [id])
-  children  Category[]  @relation("CategoryParent")
-  products  Product[]
+  parent     categories?  @relation("CategoryParent", fields: [parent_id], references: [id])
+  children   categories[] @relation("CategoryParent")
+  products   products[]
 }
 
-model Product {
-  id          String      @id @default(uuid())
+model products {
+  id          String         @id @default(uuid())
   name        String
   description String
-  price       Decimal     @db.Decimal(10,2)
+  price       Decimal         @db.Decimal(10,2)
   stock       Int
-  categoryId  String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  category_id String?
+  created_at  DateTime        @default(now())
+  updated_at  DateTime        @updatedAt
 
-  category    Category?   @relation(fields: [categoryId], references: [id])
-  images      ProductImage[]
-  reviews     Review[]
-  orderItems  OrderItem[]
-  cartItems   CartItem[]
+  category    categories?     @relation(fields: [category_id], references: [id])
+  images      product_images[]
+  reviews     reviews[]
+  order_items order_items[]
+  cart_items  cart_items[]
 }
 
-model ProductImage {
+model product_images {
+  id          String   @id @default(uuid())
+  url         String
+  product_id  String
+  product     products @relation(fields: [product_id], references: [id])
+}
+
+model carts {
+  id         String      @id @default(uuid())
+  user_id    String
+  created_at DateTime     @default(now())
+
+  user       users        @relation(fields: [user_id], references: [id])
+  items      cart_items[]
+}
+
+model cart_items {
   id         String   @id @default(uuid())
-  url        String
-  productId  String
-  product    Product  @relation(fields: [productId], references: [id])
+  cart_id    String
+  product_id String
+  quantity   Int       @default(1)
+  price      Decimal   @db.Decimal(10,2)
+
+  cart       carts     @relation(fields: [cart_id], references: [id])
+  product    products  @relation(fields: [product_id], references: [id])
 }
 
-model Cart {
-  id        String     @id @default(uuid())
-  userId    String
-  createdAt DateTime    @default(now())
+model orders {
+  id              String              @id @default(uuid())
+  user_id         String
+  address_id      String?
+  total_amount    Decimal              @db.Decimal(10,2)
+  payment_status  order_payment_status @default(pending)
+  order_status    order_status         @default(placed)
+  created_at      DateTime             @default(now())
+  updated_at      DateTime             @updatedAt
 
-  user      User        @relation(fields: [userId], references: [id])
-  items     CartItem[]
+  user            users                @relation(fields: [user_id], references: [id])
+  address         addresses?           @relation(fields: [address_id], references: [id])
+  items           order_items[]
+  payment         payments?
 }
 
-model CartItem {
-  id        String   @id @default(uuid())
-  cartId    String
-  productId String
-  quantity  Int       @default(1)
-  price     Decimal   @db.Decimal(10,2)
+model order_items {
+  id         String   @id @default(uuid())
+  order_id   String
+  product_id String
+  quantity   Int
+  price      Decimal   @db.Decimal(10,2)
 
-  cart      Cart      @relation(fields: [cartId], references: [id])
-  product   Product   @relation(fields: [productId], references: [id])
+  order      orders    @relation(fields: [order_id], references: [id])
+  product    products  @relation(fields: [product_id], references: [id])
 }
 
-model Order {
-  id            String             @id @default(uuid())
-  userId        String
-  addressId     String?
-  totalAmount   Decimal             @db.Decimal(10,2)
-  paymentStatus OrderPaymentStatus  @default(PENDING)
-  orderStatus   OrderStatus         @default(PLACED)
-  createdAt     DateTime            @default(now())
-  updatedAt     DateTime            @updatedAt
+model payments {
+  id         String          @id @default(uuid())
+  order_id   String          @unique
+  provider   String
+  amount     Decimal          @db.Decimal(10,2)
+  status     payment_status   @default(pending)
+  created_at DateTime         @default(now())
 
-  user          User                @relation(fields: [userId], references: [id])
-  address       Address?            @relation(fields: [addressId], references: [id])
-  items         OrderItem[]
-  payment       Payment?
+  order      orders           @relation(fields: [order_id], references: [id])
 }
 
-model OrderItem {
-  id        String   @id @default(uuid())
-  orderId   String
-  productId String
-  quantity  Int
-  price     Decimal   @db.Decimal(10,2)
+model reviews {
+  id         String   @id @default(uuid())
+  product_id String
+  user_id    String
+  rating     Int
+  comment    String
+  created_at DateTime @default(now())
 
-  order     Order     @relation(fields: [orderId], references: [id])
-  product   Product   @relation(fields: [productId], references: [id])
-}
-
-model Payment {
-  id        String          @id @default(uuid())
-  orderId   String          @unique
-  provider  String
-  amount    Decimal          @db.Decimal(10,2)
-  status    PaymentStatus    @default(PENDING)
-  createdAt DateTime         @default(now())
-
-  order     Order            @relation(fields: [orderId], references: [id])
-}
-
-model Review {
-  id        String   @id @default(uuid())
-  productId String
-  userId    String
-  rating    Int
-  comment   String
-  createdAt DateTime @default(now())
-
-  product   Product  @relation(fields: [productId], references: [id])
-  user      User     @relation(fields: [userId], references: [id])
+  product    products @relation(fields: [product_id], references: [id])
+  user       users    @relation(fields: [user_id], references: [id])
 }

@@ -14,7 +14,7 @@ const register = async (req, res) => {
     if (!name || !email || !password)
       return res.status(400).json({ message: "All fields required." });
 
-    const existing = await pool.query("SELECT id FROM User WHERE email=$1", [
+    const existing = await pool.query("SELECT id FROM users WHERE email=$1", [
       email,
     ]);
 
@@ -24,7 +24,7 @@ const register = async (req, res) => {
     const hashPassword = await bcrypt.hash(password, 10);
 
     const insertQuery = `
-    INSERT INTO user (name, email, passwordHash, role, createdAt, updatedAt)
+    INSERT INTO users (name, email, password_hash, role, created_at, updated_at)
     VALUES ($1, $2, $3, $4, NOW(), NOW())
     RETURNING id, name, email, role
     `;
@@ -53,7 +53,7 @@ const login = async (req, res) => {
       return res.status(400).json({ message: "Email and Password required." });
 
     // Check user
-    const checkUser = await pool.query("SELECT id FROM User WHERE email=$1", [
+    const checkUser = await pool.query("SELECT * FROM users WHERE email=$1", [
       email,
     ]);
 
