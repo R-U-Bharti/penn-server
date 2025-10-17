@@ -3,6 +3,7 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const routes = require("./src/routes/index.js");
 const morgan = require("morgan");
+const errorHandler = require("./src/middlewares/error.middleware.js");
 
 dotenv.config();
 
@@ -16,6 +17,9 @@ app.use(morgan('dev'))
 
 // Routes
 app.use("/api", routes);
+
+// Global Error Handler
+app.use(errorHandler)
 
 // Root endpoint
 app.get("/", (req, res) => {
