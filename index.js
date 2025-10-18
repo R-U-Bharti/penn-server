@@ -3,6 +3,7 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const routes = require("./src/routes/index.js");
 const morgan = require("morgan");
+const path = require('path')
 const errorHandler = require("./src/middlewares/error.middleware.js");
 
 dotenv.config();
@@ -23,7 +24,7 @@ app.use(errorHandler)
 
 // Root endpoint
 app.get("/", (req, res) => {
-  res.send("Welcome to the Penn Server API");
+  res.sendFile(path.join(__dirname,'welcome.html'));
 });
 
 // Start the server
