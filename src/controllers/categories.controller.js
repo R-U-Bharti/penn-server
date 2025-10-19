@@ -68,13 +68,13 @@ const createSubCategory = asyncHandler(async (req, res) => {
   }
 
   // Remove duplicates from input
-  const uniqueSubs = [...new Set(sub_categories.map(name => name.trim()))];
+  const uniqueSubs = [...new Set(sub_categories.filter(item => item && item.length > 0).map(name => name.trim()))];
 
   // Prepare to track success/failure
   const succeed = [];
   const failed = [];
 
-  const checkSubQuery = `SELECT id FROM categories WHERE name = $1 AND parent_id = $2`;
+  const checkSubQuery = `SELECT id FROM categories WHERE LOWER(name) = LOWER($1) AND parent_id = $2`;
   const insertQuery = `INSERT INTO categories (name, parent_id) VALUES ($1, $2)`;
 
   for (const cat of uniqueSubs) {
