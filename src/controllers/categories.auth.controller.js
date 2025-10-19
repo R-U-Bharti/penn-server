@@ -38,7 +38,7 @@ const createCategories = asyncHandler(async (req, res) => {
 const deleteCategories = asyncHandler(async (req, res) => {
   const { id } = req.body;
 
-  const deleteQuery = `DELETE FROM categories WHERE id=$1`;
+  const deleteQuery = `DELETE FROM categories WHERE id=$1 OR parent_id=$1`;
   pool.query(deleteQuery, [id]).then(() => {
     res.json({ message: "Category deleted." });
   });
@@ -52,26 +52,57 @@ const getAllCategories = asyncHandler(async (req, res) => {
 });
 
 const createSubCategory = asyncHandler(async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.query;
   const { sub_categories } = req.body;
 
-  const checkCat = await pool.query(`SELECT id FROM categories WHERE id=$1`, [
+  if (!id || !Array.isArray(sub_categories) || sub_categories.length === 0) {
+    return res.status(400).json({ message: "Invalid input." });
+  }
+
+  // Check parent category exists
+  const checkCat = await pool.query(`SELECT id FROM categories WHERE id = $1`, [
     id,
   ]);
-  if (!checkCat)
+  if (checkCat.rowCount === 0) {
     return res.status(400).json({ message: "Parent category not found." });
+  }
 
-  let suCatList = sub_categories.reduce((acc,cat) => acc[cat] = (acc[cat] || 0), {});
+  // Remove duplicates from input
+  const uniqueSubs = [...new Set(sub_categories.map(name => name.trim()))];
 
+  // Prepare to track success/failure
+  const succeed = [];
+  const failed = [];
+
+  const checkSubQuery = `SELECT id FROM categories WHERE name = $1 AND parent_id = $2`;
   const insertQuery = `INSERT INTO categories (name, parent_id) VALUES ($1, $2)`;
 
-  const insertAll = sub_categories.map(cat =>
-    pool.query(insertQuery, [cat, id])
-  );
+  for (const cat of uniqueSubs) {
+    try {
+      // Check sub categories exist or not
+      const exist = await pool.query(checkSubQuery, [cat, id]);
+      if (exist.rowCount > 0) {
+        failed.push(cat);
+        continue;
+      }
 
-  await Promise.all(insertAll);
+      // Insert sub category
+      await pool.query(insertQuery, [cat, id]);
+      succeed.push(cat);
+    } catch (err) {
+      failed.push(cat);
+    }
+  }
 
-  return res.json({ message: "All sub-categories added successfully." });
+  return res.json({
+    succeed,
+    failed,
+  });
 });
 
-module.exports = { createCategories, deleteCategories, getAllCategories };
+module.exports = {
+  createCategories,
+  deleteCategories,
+  getAllCategories,
+  createSubCategory,
+};
