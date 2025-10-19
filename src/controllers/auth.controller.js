@@ -52,10 +52,10 @@ const login = asyncHandler(async (req, res) => {
     email,
   ]);
 
-  if (!checkUser) return res.status(400).json({ message: "User not exist." });
+  if (checkUser.rowCount === 0) return res.status(400).json({ message: "User not exist." });
 
   const user = checkUser.rows[0];
-  const checkPassword = bcrypt.compare(password, user.hashPassword);
+  const checkPassword = bcrypt.compare(password, user.password_hash);
   if (!checkPassword)
     return res.status(401).json({ message: "Password Invalid." });
 

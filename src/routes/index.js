@@ -1,6 +1,7 @@
 const express = require("express");
 const authRoutes = require("./auth.routes.js");
-const categoryRoutes = require('./categories.route.js')
+const categoryRoutes = require('./categories.route.js');
+const verifyToken = require("../middlewares/auth.middleware.js");
 
 const router = express.Router();
 
@@ -8,7 +9,7 @@ const router = express.Router();
 router.use("/auth", authRoutes);
 
 // Mount all categories routes
-router.use('/category', categoryRoutes)
+router.use('/category', verifyToken , categoryRoutes)
 
 // Example test route
 router.get("/", (req, res) => {

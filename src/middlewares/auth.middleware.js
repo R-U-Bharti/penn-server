@@ -1,7 +1,13 @@
-import jwt from "jsonwebtoken";
+const jwt = require("jsonwebtoken")
 
-export const verifyToken = (req, res, next) => {
-  const token = req.headers.authorization.split(" ")[1];
+const verifyToken = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  
+if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  return res.status(401).json({ message: "Not Authorized." });
+}
+
+const token = authHeader.split(" ")[1];
 
   if (!token) return res.status(401).json({ message: "Not Authorized." });
 
@@ -13,3 +19,5 @@ export const verifyToken = (req, res, next) => {
     res.status(401).json({ message: "Token not valid." });
   }
 };
+
+module.exports = verifyToken;
