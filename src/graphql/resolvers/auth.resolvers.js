@@ -44,9 +44,9 @@ const mutations = {
     if (!valid) throw new Error("Password Invalid.");
 
     const token = jwt.sign(
-      {id: user.id},
+      { id: user.id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "1d",  algorithm: "HS256", }
+      { expiresIn: "1d", algorithm: "HS256" }
     );
 
     return {
