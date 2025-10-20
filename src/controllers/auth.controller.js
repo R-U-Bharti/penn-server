@@ -4,7 +4,7 @@
 */
 
 const bcrypt = require("bcrypt");
-const pool = require("../config/db");
+const pool = require("../config/pool");
 const jwt = require("jsonwebtoken");
 const asyncHandler = require("../utils/asyncHandler");
 

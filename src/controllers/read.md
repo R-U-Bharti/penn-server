@@ -1,0 +1,1 @@
+This controller only for Rest API

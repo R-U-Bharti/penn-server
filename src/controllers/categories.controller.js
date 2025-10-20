@@ -1,4 +1,4 @@
-const pool = require("../config/db");
+const pool = require("../config/pool");
 const asyncHandler = require("../utils/asyncHandler");
 
 const createCategories = asyncHandler(async (req, res) => {
