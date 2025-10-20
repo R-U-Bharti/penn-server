@@ -4,34 +4,25 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const morgan = require("morgan");
 const { ApolloServer } = require("@apollo/server");
-const { mergeTypeDefs, mergeResolvers } = require("@graphql-tools/merge");
 const { json } = require("body-parser");
 const { expressMiddleware } = require("@as-integrations/express5");
 
 // Files import
-const categoryTypeDefs = require("./src/graphql/category.schema.js");
-const productsTypeDefs = require("./src/graphql/produts.schema.js");
-const categoryResolvers = require("./src/graphql/category.resolver.js");
-const productsResolvers = require("./src/graphql/products.resolver.js");
+const { allTypeDefs, allResolvers } = require("./src/graphql/index.js");
+const contextMiddleware = require("./src/middlewares/contextMiddleware.js");
 
 dotenv.config(); // env config
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Appending all TypeDefs
-const typeDefs = mergeTypeDefs([categoryTypeDefs, productsTypeDefs]);
-
-// Appending all Resolvers
-const resolvers = mergeResolvers([categoryResolvers, productsResolvers]);
-
 async function startGraphQLServer() {
-
   // Creating Apollo server for GraphQL
   const server = new ApolloServer({
-    typeDefs,
-    resolvers,
+    typeDefs: allTypeDefs,
+    resolvers: allResolvers,
     introspection: true, // ✅ enable Apollo Sandbox
+    nodeEnv: "development",
   });
 
   // Using this method will run the api without baseUrl too as this is standalone
@@ -54,9 +45,7 @@ async function startGraphQLServer() {
 
     // Middleware for token
     expressMiddleware(server, {
-      context: async ({ req }) => ({
-        token: req.headers.authorization || null,
-      }),
+      context: contextMiddleware,
     })
   );
 

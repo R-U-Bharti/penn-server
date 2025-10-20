@@ -1,4 +1,4 @@
-const categoryTypeDefs = `
+const categoryTypeDefs = `#graphql
   type Category {
     id: ID!
     name: String!
@@ -15,6 +15,5 @@ const categoryTypeDefs = `
     deleteCategories(id: ID!): Category
     }
     `;
-    
-    module.exports = categoryTypeDefs;
-    // createSubCategory(id: ID!): Boolean
+
+module.exports = categoryTypeDefs;

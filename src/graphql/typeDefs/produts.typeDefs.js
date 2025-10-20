@@ -1,4 +1,4 @@
-const productsTypeDefs = `
+const productsTypeDefs = `#graphql
   type Product {
     id: ID!
     name: String!
