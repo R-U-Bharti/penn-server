@@ -5,14 +5,25 @@ const categoryTypeDefs = `#graphql
     parent_id: ID
   }
 
+  type SubCategoryResponse {
+  succeed: [String!]!
+  failed: [String!]!
+}
+
+input CreateSubCategoryInput {
+  parentId: Int!
+  subCategories: [String!]!
+}
+
   type Query {
-    categories: [Category]           # get all categories
-    category(id: ID!): Category      # get single category by id
+    allCategory: [Category]           # get all categories
+    categoryById(id: ID!): Category      # get single category by id
   }
 
   type Mutation {
-    createCategories(name: String!): Category
-    deleteCategories(id: ID!): Category
+    createCategory(name: String!): Category
+    deleteCategory(id: ID!): String
+    createSubCategory(input: CreateSubCategoryInput!): SubCategoryResponse!
     }
     `;
 
