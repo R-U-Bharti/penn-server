@@ -4,12 +4,14 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const morgan = require("morgan");
 const { ApolloServer } = require("@apollo/server");
-const { json } = require("body-parser");
 const { expressMiddleware } = require("@as-integrations/express5");
 
 // Files import
 const { allTypeDefs, allResolvers } = require("./src/graphql/index.js");
 const contextMiddleware = require("./src/middlewares/contextMiddleware.js");
+const graphqlMiddleware = require("./src/middlewares/graphql.middleware.js");
+const router = require("./src/routes/index.js");
+const errorHandler = require("./src/middlewares/error.middleware.js");
 
 dotenv.config(); // env config
 
@@ -33,15 +35,25 @@ async function startGraphQLServer() {
   //   }),
   // });
 
+  // Middleware
+  app.use(cors()); // cors policy
+  app.use(express.json()); // json handler
+  app.use(morgan("dev")); // For API log
+
   // Starting Apollo Server
   await server.start();
+
+  // REST API endpoints
+  app.use("/api", router);
+
+  // Global Error Handler
+  app.use(errorHandler);
 
   // ✅ Only GraphQL endpoint
   app.use(
     "/graphql", // baseUrl
-    cors(), // cors policy
-    json(), // json handler
-    morgan("dev"), // API log
+
+    graphqlMiddleware,
 
     // Middleware for token
     expressMiddleware(server, {
@@ -51,7 +63,9 @@ async function startGraphQLServer() {
 
   // Making GraphQL run with app config
   app.listen(PORT, () => {
-    console.log(`🧠 GraphQL API ready at http://localhost:${PORT}/graphql`);
+    console.log(
+      `🧠 GraphQL API ready at http://localhost:${PORT}/graphql \n✍️  REST API ready at http://localhost:${PORT}/api`
+    );
   });
 }
 

@@ -52,7 +52,8 @@ const login = asyncHandler(async (req, res) => {
     email,
   ]);
 
-  if (checkUser.rowCount === 0) return res.status(400).json({ message: "User not exist." });
+  if (checkUser.rowCount === 0)
+    return res.status(400).json({ message: "User not exist." });
 
   const user = checkUser.rows[0];
   const checkPassword = bcrypt.compare(password, user.password_hash);
@@ -67,6 +68,7 @@ const login = asyncHandler(async (req, res) => {
 
   return res.json({
     token,
+    expiredIn: "24",
     user: {
       id: user.id,
       name: user.name,
