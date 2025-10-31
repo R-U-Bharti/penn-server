@@ -3,13 +3,13 @@ const jwt = require("jsonwebtoken");
 const graphqlMiddleware = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
-  if (!authHeader) {
-    return res.status(401).json({ message: "Authorization header missing" });
-  }
+  // if (!authHeader) {
+  //   return res.status(401).json({ message: "Authorization header missing" });
+  // }
 
-  const token = authHeader.split(" ")[1];
-  // const token =
-  //   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQ2NzY2OWE5LTY0MGUtNDhkNy04ZDFmLTJiZDQzMzMxZjNhZiIsInJvbGUiOiJjdXN0b21lciIsImlhdCI6MTc2MTgyMDI3NiwiZXhwIjoxNzYxOTA2Njc2fQ.U1-HauTLjDet9frwkKhPIUMvKDo6SsSsb38XHDVo8MU";
+  // const token = authHeader.split(" ")[1];
+  const token =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQ2NzY2OWE5LTY0MGUtNDhkNy04ZDFmLTJiZDQzMzMxZjNhZiIsInJvbGUiOiJjdXN0b21lciIsImlhdCI6MTc2MTgyMDI3NiwiZXhwIjoxNzYxOTA2Njc2fQ.U1-HauTLjDet9frwkKhPIUMvKDo6SsSsb38XHDVo8MU";
 
   if (!token) {
     return res.status(401).json({ message: "Token missing" });
