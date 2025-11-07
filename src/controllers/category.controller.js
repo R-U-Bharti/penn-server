@@ -16,3 +16,5 @@ const getCategoryById = async (_, { id }) => {
 const createCategory = async(_, {name}) => {
     
 }
+
+module.exports = {getAllCategory, getCategoryById, createCategory}

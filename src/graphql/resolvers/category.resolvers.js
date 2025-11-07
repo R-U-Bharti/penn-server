@@ -1,18 +1,13 @@
 const prisma = require("../../config/prisma");
+const { getAllCategory, createCategory, getCategoryById } = require("../../controllers/category.controller");
 
 const categoryResolvers = {
   Query: {
     // Get all categories (with subcategories)
-    allCategory: async () => {
-      const data = await prisma.categories.findMany();
-      return data;
-    },
+    allCategory: getAllCategory,
 
     // Get a single category by ID
-    categoryById: async (_, { id }) => {
-      const data = prisma.categories.findUnique({ where: { id: id } });
-      return data;
-    },
+    categoryById: getCategoryById,
   },
 
   Mutation: {
