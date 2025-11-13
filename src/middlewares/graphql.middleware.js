@@ -9,7 +9,7 @@ const graphqlMiddleware = (req, res, next) => {
 
   // const token = authHeader.split(" ")[1];
   const token =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImViNjQ3MWI1LTU3MDctNDEwZi1iYzExLWFjOGQxNDVmNWVkNSIsInJvbGUiOiJjdXN0b21lciIsImlhdCI6MTc2Mjc3MDEyNywiZXhwIjoxNzYyODU2NTI3fQ.tYhqgcb3idoQo5m8sSwpStjpEJTB-PxenDNbqmJs8cI";
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImViNjQ3MWI1LTU3MDctNDEwZi1iYzExLWFjOGQxNDVmNWVkNSIsInJvbGUiOiJjdXN0b21lciIsImlhdCI6MTc2MzAwNTU3MCwiZXhwIjoxNzYzMDkxOTcwfQ.yWrA-Do5lwLWRxAHAFawDvz5-qawCWP0oiIx34N4gZ0";
 
   if (!token) {
     return res.status(401).json({ message: "Token missing" });

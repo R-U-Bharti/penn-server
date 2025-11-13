@@ -9,7 +9,6 @@ const getAllCategory = async () => {
   return data;
 };
 
-
 const getCategoryById = async (_, { id }) => {
   if (!id) return GraphQLError("ID required.");
 
@@ -18,7 +17,7 @@ const getCategoryById = async (_, { id }) => {
 };
 
 const createCategory = async (_, { name }) => {
-  const category = await prisma.category.create({
+  const category = await prisma.categories.create({
     data: {
       name: name.trim(),
     },
@@ -33,9 +32,7 @@ const deleteCategory = async (_, { id }) => {
   return "Deleted Successfully.";
 };
 
-const createSubCategory = async (_, input) => {
-  const { parentId, subCategories } = input;
-
+const createSubCategory = async (_, { parentId, subCategories }) => {
   if (
     !parentId ||
     !Array.isArray(subCategories) ||
@@ -45,7 +42,7 @@ const createSubCategory = async (_, input) => {
   }
 
   // Check if parent category exists
-  const parent = await prisma.category.findUnique({
+  const parent = await prisma.categories.findUnique({
     where: { id: parentId },
   });
   if (!parent) {
@@ -65,9 +62,9 @@ const createSubCategory = async (_, input) => {
   for (const name of uniqueSubs) {
     try {
       // Check if subcategory already exists under the parent
-      const exist = await prisma.category.findFirst({
+      const exist = await prisma.categories.findFirst({
         where: {
-          parentId,
+          parent_id: { equals: parentId },
           name: { equals: name, mode: "insensitive" }, // case-insensitive check
         },
       });
@@ -78,10 +75,10 @@ const createSubCategory = async (_, input) => {
       }
 
       // Insert subcategory
-      await prisma.category.create({
+      await prisma.categories.create({
         data: {
-          name,
-          parentId,
+          name: name,
+          parent_id: parentId,
         },
       });
       succeed.push(name);
@@ -98,5 +95,5 @@ module.exports = {
   getCategoryById,
   createCategory,
   deleteCategory,
-  createSubCategory
+  createSubCategory,
 };
