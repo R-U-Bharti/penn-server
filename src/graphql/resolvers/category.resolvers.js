@@ -4,6 +4,7 @@ const {
   getCategoryById,
   deleteCategory,
   createSubCategory,
+  getSubCategoryList,
 } = require("../../controllers/category.controller");
 
 const categoryResolvers = {
@@ -11,11 +12,15 @@ const categoryResolvers = {
     // Get all categories (with subcategories)
     allCategory: getAllCategory,
 
-    // Get a single category by ID
-    categoryById: getCategoryById,
   },
-
+  
   Mutation: {
+    // Get a category by ID
+    categoryById: getCategoryById,
+
+    // Get sub categories list by parentId
+    subCaegoryList: getSubCategoryList,
+
     // Create category or subcategory
     createCategory: createCategory,
 
