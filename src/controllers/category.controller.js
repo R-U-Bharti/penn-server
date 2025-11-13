@@ -20,9 +20,11 @@ const getSubCategoryList = async (_, { parentId }) => {
   if (!parentId) return GraphQLError("Parent ID required.");
 
   const parent = await prisma.categories.findFirst({ where: { id: parentId } });
-  const data = await prisma.categories.findMany({ where: { parent_id: parentId } });
+  const data = await prisma.categories.findMany({
+    where: { parent_id: parentId },
+  });
 
-  const result = data.map((sub) => ({...sub, parentCategory: parent.name}))
+  const result = data.map(sub => ({ ...sub, parentCategory: parent.name }));
 
   return result;
 };
